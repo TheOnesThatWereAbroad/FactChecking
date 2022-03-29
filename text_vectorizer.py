@@ -5,7 +5,7 @@ import glob
 from urllib import request
 import zipfile
 from sklearn.preprocessing import LabelBinarizer
-
+from tqdm import tqdm
 
 class NotAdaptedError(Exception):
     pass
@@ -17,7 +17,7 @@ class TextVectorizer:
         glove_url="http://nlp.stanford.edu/data/glove.6B.zip",
         embedding_dim=100,
         embedding_folder="glove",
-        max_size=300,
+        max_sentence_length=300,
     ):
         """
         This class parses the GloVe embeddings, the input documents are expected
@@ -29,13 +29,13 @@ class TextVectorizer:
         glove_url : The url of the GloVe embeddings.
         embedding_dim : The dimension of the embeddings (pick one of 50, 100, 200, 300).
         embedding_folder : folder where the embedding will be downloaded
-        max_size : The maximum size of the documents.
+        max_sentence_length : The maximum size of the documents.
         """
         self.embedding_dim = embedding_dim
         self.download_glove_if_needed(
             glove_url=glove_url, embedding_folder=embedding_folder
         )
-        self.max_size = max_size
+        self.max_sentence_length = max_sentence_length
 
         # create the vocabulary
         self.vocabulary = self.parse_glove(embedding_folder)
@@ -111,7 +111,7 @@ class TextVectorizer:
             self.vocabulary[word] = np.random.uniform(-1, 1, size=self.embedding_dim)
         print(f"Generated embeddings for {len(oov_words)} OOV words.")
 
-    def transform(self, dataset, columns=None):
+    def transform(self, dataset, columns=None, splits=1):
         """
         Transform the data into the input structure for the training. This method should be used always after the adapt method.
 
@@ -123,12 +123,11 @@ class TextVectorizer:
         -------
         Array of shape (number of documents, number of words, embedding dimension)
         """
-        for column in columns:
-            # group-apply-combine approach to avoid filling the RAM
-            for name, group in dataset[column].groupby(level=0):
-                group = group.apply(self._transform_document)
-                dataset[column][name] = group.values.tolist()
-        return dataset
+        X_claim, X_evidence = [], []
+        for index, row in dataset.iterrows():
+            X_claim.append(self._transform_document(row["Claim"]))
+            X_evidence.append(self._transform_document(row["Evidence"]))
+        return np.stack(X_claim), np.stack(X_evidence)
 
     def _transform_document(self, document):
         """
@@ -143,13 +142,16 @@ class TextVectorizer:
         Numpy array of shape (number of words, embedding dimension)
         """
         try:
-            if len(document) > self.max_size:
+            if not document or len(document) > self.max_sentence_length:
                 return None
-            return np.vstack((np.array([self.vocabulary[word] for word in document]),np.zeros((self.max_size - len(document), self.embedding_dim))))
+            # return np.array([self.vocabulary[word] for word in document])
+            return np.vstack((np.array([self.vocabulary[word] for word in document]),np.zeros((self.max_sentence_length - len(document), self.embedding_dim))))
         except KeyError:
             raise NotAdaptedError(
                 f"The whole document is not in the vocabulary. Please adapt the vocabulary first."
             )
+        except TypeError: # NaNs
+            return None
 
 
 def encode_target(target_series):
