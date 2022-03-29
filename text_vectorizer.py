@@ -109,9 +109,12 @@ class TextVectorizer:
         # add the OOV words to the vocabulary giving them a random encoding
         for word in oov_words:
             self.vocabulary[word] = np.random.uniform(-1, 1, size=self.embedding_dim)
+        self.encoding = {word: i for i, word in enumerate(self.vocabulary.keys())}
+        self.embedding_matrix = np.array(list(self.vocabulary.values()))
         print(f"Generated embeddings for {len(oov_words)} OOV words.")
+        return self.embedding_matrix
 
-    def transform(self, dataset, columns=None, splits=1):
+    def transform(self, dataset, columns=None, to_embedding=False):
         """
         Transform the data into the input structure for the training. This method should be used always after the adapt method.
 
@@ -124,12 +127,31 @@ class TextVectorizer:
         Array of shape (number of documents, number of words, embedding dimension)
         """
         X_claim, X_evidence = [], []
-        for index, row in dataset.iterrows():
-            X_claim.append(self._transform_document(row["Claim"]))
-            X_evidence.append(self._transform_document(row["Evidence"]))
+        for index, row in tqdm(dataset.iterrows()):
+            if to_embedding:
+                X_claim.append(self._transform_document_to_embedding(row["Claim"]))
+                X_evidence.append(self._transform_document_to_embedding(row["Evidence"]))
+            else:
+                X_claim.append(self._transform_document_to_encoding(row["Claim"]))
+                X_evidence.append(self._transform_document_to_encoding(row["Evidence"]))
         return np.stack(X_claim), np.stack(X_evidence)
 
-    def _transform_document(self, document):
+
+    def _transform_document_to_encoding(self, document):
+        """
+        Transforms a single document to the matrix encoding
+
+        Parameters
+        ----------
+        document : The document to be transformed.
+
+        Returns
+        -------
+        Numpy array of shape (number of words)
+        """
+        return np.hstack((np.array([self.encoding[word] for word in document]), np.zeros(self.max_sentence_length - len(document))))
+
+    def _transform_document_to_embedding(self, document):
         """
         Transforms a single document to the GloVe embedding
 
