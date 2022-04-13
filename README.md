@@ -4,8 +4,6 @@ This repository contains a project realized as part of the *Natural Language Pro
 
 ## Description
 
-*Part-of-speech (POS) tagging* is a popular NLP task which refers to categorizing words in a text (corpus) in correspondence with a particular part of speech, depending on the definition of the word and its context.
-
 *Fact checking* is a popular NLP task which consists in verify the reliability of some statement, by comparing it with a given knowledge base. In this experiment, we’ll use the FEVER dataset to train a model able to understand whether a fact is verifiable. The model consists in a neural network, structured in different ways, working on embeddings obtained with GloVE. A voting mechanism is then required to make predictions.
 
 ## Dataset
