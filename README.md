@@ -1,6 +1,6 @@
 # ✅ Fact-checking ⁉️
 
-This repository contains a project realized as part of the *Natural Language Processing* course of the [Master's degree in Artificial Intelligence](https://corsi.unibo.it/2cycle/artificial-intelligence), University of Bologna.
+This repository contains a project realized for an assignment of the *Natural Language Processing* course of the [Master's degree in Artificial Intelligence](https://corsi.unibo.it/2cycle/artificial-intelligence), University of Bologna.
 
 ## Description
 
