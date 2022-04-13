@@ -19,9 +19,13 @@ In order to have a better understanging of our proposed solution, take a look to
 
 ## Model
 What the neural network does is to encode two different inputs (claim and evidence), merge them in some way, and output a single value, representing the probability that the claim is correct. The following simplified schema shows the model architecture:
+
+
 ![](https://drive.google.com/uc?export=view&id=1Wm_YBnFwgJtxcWEBpPbTBEVkpKaL08Jp)
 
-Two different models are been trained: a base one that use of the last state of the LSTM layer for the sentence embedding and combine the two sentences through an Add layer; the other one is just an extension using the same configuration of the previous and adding the cosine similarity between claim and evidence to the input of the network.
+Two different models are been trained: 
+- a base one that use the last state of a LSTM layer for the sentence embedding and combine the two sentences through an Add layer
+- the other one is just an extension using the same configuration of the previous and adding the cosine similarity between claim and evidence to the input of the network.
 
 The trained models are available at the following [link](https://drive.google.com/drive/folders/1Ec8iRzONGmZ7Z9J8dCs4x-mVxei5wOgO?usp=sharing).
 
@@ -40,8 +44,8 @@ This is an example of the prediction made by the extended model on a test set of
 ```
 CLAIM:  Scream has some level of success.
 EVIDENCES:
-	1. (SUPPORTS) The first series entry , Scream , was released on December 20 , 1996 and is currently the highest-grossing slasher film in the United States )
-	2. (SUPPORTS) It received several awards and award nominations .
+	1. (SUPPORTS) The first series entry , Scream , was released on December 20 , 1996 and is currently the highest-grossing slasher film in the United States 
+	2. (SUPPORTS) It received several awards and award nominations 
 	3. (SUPPORTS) The film went on to financial and critical acclaim , earning $ 173 million worldwide , and became the highest-grossing slasher film in the US in unadjusted dollars 
 PREDICTION:
 	1. SUPPORTED (Confidence 98%)
